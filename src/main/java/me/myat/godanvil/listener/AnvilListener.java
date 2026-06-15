@@ -2,27 +2,34 @@ package me.myat.godanvil.listener;
 
 import me.myat.godanvil.GodAnvilPlugin;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
+import org.bukkit.inventory.InventoryView;
 
 public class AnvilListener implements Listener {
 
     @EventHandler
     public void onPrepareAnvil(PrepareAnvilEvent event) {
 
-        Location location = event.getInventory().getLocation();
+        InventoryView view = event.getView();
+        Block block = view.getTopInventory().getLocation() != null
+                ? view.getTopInventory().getLocation().getBlock()
+                : null;
 
-        if (location == null) {
+        if (block == null) {
             return;
         }
+
+        Location location = block.getLocation();
 
         if (!GodAnvilPlugin.getInstance().getGodAnvils().contains(location)) {
             return;
         }
 
         GodAnvilPlugin.getInstance().getLogger().info(
-                "God Anvil used at "
+                "GOD ANVIL DETECTED at "
                         + location.getBlockX() + ", "
                         + location.getBlockY() + ", "
                         + location.getBlockZ()
