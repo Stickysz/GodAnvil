@@ -1,5 +1,6 @@
 package me.myat.godanvil;
 
+import me.myat.godanvil.listener.AnvilListener;
 import me.myat.godanvil.listener.BlockListener;
 import me.myat.godanvil.listener.CraftListener;
 import me.myat.godanvil.storage.GodAnvilStorage;
@@ -30,12 +31,20 @@ public final class GodAnvilPlugin extends JavaPlugin {
                 this
         );
 
+        getServer().getPluginManager().registerEvents(
+                new AnvilListener(),
+                this
+        );
+
         getLogger().info("GodAnvil has been enabled!");
     }
 
     @Override
     public void onDisable() {
-        storage.save();
+        if (storage != null) {
+            storage.save();
+        }
+
         getLogger().info("GodAnvil has been disabled!");
     }
 
