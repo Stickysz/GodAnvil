@@ -2,6 +2,7 @@ package me.myat.godanvil;
 
 import me.myat.godanvil.listener.BlockListener;
 import me.myat.godanvil.listener.CraftListener;
+import me.myat.godanvil.storage.GodAnvilStorage;
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -13,10 +14,14 @@ public final class GodAnvilPlugin extends JavaPlugin {
     private static GodAnvilPlugin instance;
 
     private final Set<Location> godAnvils = new HashSet<>();
+    private GodAnvilStorage storage;
 
     @Override
     public void onEnable() {
         instance = this;
+
+        storage = new GodAnvilStorage(this);
+        storage.load();
 
         CraftListener.registerRecipe();
 
@@ -30,6 +35,7 @@ public final class GodAnvilPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        storage.save();
         getLogger().info("GodAnvil has been disabled!");
     }
 
@@ -39,5 +45,9 @@ public final class GodAnvilPlugin extends JavaPlugin {
 
     public Set<Location> getGodAnvils() {
         return godAnvils;
+    }
+
+    public GodAnvilStorage getStorage() {
+        return storage;
     }
 }
