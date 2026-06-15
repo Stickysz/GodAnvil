@@ -2,42 +2,30 @@ package me.myat.godanvil.listener;
 
 import me.myat.godanvil.GodAnvilPlugin;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryOpenEvent;
-import org.bukkit.inventory.AnvilInventory;
-import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.event.inventory.PrepareAnvilEvent;
 
 public class AnvilListener implements Listener {
 
     @EventHandler
-    public void onAnvilOpen(InventoryOpenEvent event) {
+    public void onPrepareAnvil(PrepareAnvilEvent event) {
 
-        if (!(event.getPlayer() instanceof Player player)) {
+        Location location = event.getInventory().getLocation();
+
+        if (location == null) {
             return;
         }
 
-        if (!(event.getInventory() instanceof AnvilInventory)) {
+        if (!GodAnvilPlugin.getInstance().getGodAnvils().contains(location)) {
             return;
         }
 
-        InventoryHolder holder = event.getInventory().getHolder();
-
-        if (!(holder instanceof Block block)) {
-            return;
-        }
-
-        Location location = block.getLocation();
-
-        if (GodAnvilPlugin.getInstance().getGodAnvils().contains(location)) {
-            GodAnvilPlugin.getInstance().getLogger().info(
-                    player.getName() + " opened a God Anvil at "
-                            + location.getBlockX() + ", "
-                            + location.getBlockY() + ", "
-                            + location.getBlockZ()
-            );
-        }
+        GodAnvilPlugin.getInstance().getLogger().info(
+                "God Anvil used at "
+                        + location.getBlockX() + ", "
+                        + location.getBlockY() + ", "
+                        + location.getBlockZ()
+        );
     }
 }
