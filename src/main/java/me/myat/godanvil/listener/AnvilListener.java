@@ -23,7 +23,7 @@ public class AnvilListener implements Listener {
         if (loc == null) return;
 
         if (!GodAnvilPlugin.getInstance().getGodAnvils().contains(loc)) {
-            return; // not a God Anvil then behaves vanillaly
+            return;
         }
 
         ItemStack left = inv.getItem(0);
@@ -48,15 +48,14 @@ public class AnvilListener implements Listener {
             Enchantment ench = e.getKey();
             int level = e.getValue();
 
-            // 🚫 ONLY forbidden combo
+            // 🚫 ONLY forbidden combo: Silk Touch + Fortune
             if ((ench == Enchantment.SILK_TOUCH &&
-                    result.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)) ||
-                (ench == Enchantment.LOOT_BONUS_BLOCKS &&
+                    result.containsEnchantment(Enchantment.FORTUNE)) ||
+                (ench == Enchantment.FORTUNE &&
                     result.containsEnchantment(Enchantment.SILK_TOUCH))) {
                 continue;
             }
 
-            // keep OG levels (no merging math, just overwrite)
             int existing = result.getEnchantmentLevel(ench);
             if (level > existing) {
                 result.addUnsafeEnchantment(ench, level);
