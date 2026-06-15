@@ -29,6 +29,7 @@ public class BlockListener implements Listener {
         )) {
             Location location = event.getBlockPlaced().getLocation();
             GodAnvilPlugin.getInstance().getGodAnvils().add(location);
+            GodAnvilPlugin.getInstance().getStorage().save();
         }
     }
 
@@ -44,6 +45,7 @@ public class BlockListener implements Listener {
         event.setDropItems(false);
 
         GodAnvilPlugin.getInstance().getGodAnvils().remove(location);
+        GodAnvilPlugin.getInstance().getStorage().save();
 
         block.getWorld().dropItemNaturally(
                 location,
