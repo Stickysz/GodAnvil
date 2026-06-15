@@ -1,0 +1,6 @@
+name: GodAnvil
+version: '1.0.0'
+main: me.myat.godanvil.GodAnvilPlugin
+api-version: '1.21'
+author: Rask
+description: Adds a God Anvil for creating unsafe enchantment combinations.
