@@ -3,7 +3,6 @@ package me.myat.godanvil.listener;
 import me.myat.godanvil.GodAnvilPlugin;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -23,6 +22,7 @@ public class AnvilListener implements Listener {
         Location location = inventory.getLocation();
 
         if (location == null) {
+            GodAnvilPlugin.getInstance().getLogger().info("[DEBUG] Anvil location is null.");
             return;
         }
 
@@ -30,117 +30,62 @@ public class AnvilListener implements Listener {
             return;
         }
 
-        ItemStack left = inventory.getFirstItem();
-        ItemStack right = inventory.getSecondItem();
+        GodAnvilPlugin.getInstance().getLogger().info("[DEBUG] God Anvil detected.");
 
-        // Empty slots
+        ItemStack left = inventory.getItem(0);
+        ItemStack right = inventory.getItem(1);
+
+        GodAnvilPlugin.getInstance().getLogger().info(
+                "[DEBUG] Left slot: " +
+                        (left == null ? "null" : left.getType().toString())
+        );
+
+        GodAnvilPlugin.getInstance().getLogger().info(
+                "[DEBUG] Right slot: " +
+                        (right == null ? "null" : right.getType().toString())
+        );
+
         if (left == null || left.getType() == Material.AIR) {
+            GodAnvilPlugin.getInstance().getLogger().info("[DEBUG] Left slot invalid.");
             event.setResult(null);
             return;
         }
 
         if (right == null || right.getType() == Material.AIR) {
+            GodAnvilPlugin.getInstance().getLogger().info("[DEBUG] Right slot invalid.");
             event.setResult(null);
             return;
         }
 
-        // Left side must NOT be a book.
-        if (left.getType() == Material.ENCHANTED_BOOK) {
-            event.setResult(null);
-            return;
-        }
-
-        // Right side MUST be an enchanted book.
         if (right.getType() != Material.ENCHANTED_BOOK) {
-            event.setResult(null);
-            return;
-        }
-
-        // Left item must be enchantable.
-        if (!isEnchantable(left)) {
+            GodAnvilPlugin.getInstance().getLogger().info("[DEBUG] Right item is not an enchanted book.");
             event.setResult(null);
             return;
         }
 
         if (!(right.getItemMeta() instanceof EnchantmentStorageMeta bookMeta)) {
+            GodAnvilPlugin.getInstance().getLogger().info("[DEBUG] Failed to read book meta.");
             event.setResult(null);
             return;
         }
 
         ItemStack result = left.clone();
 
-        // Apply every enchantment from the book.
         for (Map.Entry<Enchantment, Integer> entry : bookMeta.getStoredEnchants().entrySet()) {
+            GodAnvilPlugin.getInstance().getLogger().info(
+                    "[DEBUG] Applying "
+                            + entry.getKey().getKey().getKey()
+                            + " "
+                            + entry.getValue()
+            );
+
             result.addUnsafeEnchantment(
                     entry.getKey(),
                     entry.getValue()
             );
         }
 
+        GodAnvilPlugin.getInstance().getLogger().info("[DEBUG] Setting custom result.");
         event.setResult(result);
-    }
-
-    private boolean isEnchantable(ItemStack item) {
-
-        Material type = item.getType();
-
-        // Armor
-        if (Tag.ITEMS_HEAD_ARMOR.isTagged(type)
-                || Tag.ITEMS_CHEST_ARMOR.isTagged(type)
-                || Tag.ITEMS_LEG_ARMOR.isTagged(type)
-                || Tag.ITEMS_FOOT_ARMOR.isTagged(type)) {
-            return true;
-        }
-
-        // Tools and weapons
-        switch (type) {
-            case WOODEN_SWORD:
-            case STONE_SWORD:
-            case IRON_SWORD:
-            case GOLDEN_SWORD:
-            case DIAMOND_SWORD:
-            case NETHERITE_SWORD:
-
-            case WOODEN_AXE:
-            case STONE_AXE:
-            case IRON_AXE:
-            case GOLDEN_AXE:
-            case DIAMOND_AXE:
-            case NETHERITE_AXE:
-
-            case WOODEN_PICKAXE:
-            case STONE_PICKAXE:
-            case IRON_PICKAXE:
-            case GOLDEN_PICKAXE:
-            case DIAMOND_PICKAXE:
-            case NETHERITE_PICKAXE:
-
-            case WOODEN_SHOVEL:
-            case STONE_SHOVEL:
-            case IRON_SHOVEL:
-            case GOLDEN_SHOVEL:
-            case DIAMOND_SHOVEL:
-            case NETHERITE_SHOVEL:
-
-            case WOODEN_HOE:
-            case STONE_HOE:
-            case IRON_HOE:
-            case GOLDEN_HOE:
-            case DIAMOND_HOE:
-            case NETHERITE_HOE:
-
-            case BOW:
-            case CROSSBOW:
-            case TRIDENT:
-            case MACE:
-            case FISHING_ROD:
-            case SHEARS:
-            case SHIELD:
-            case ELYTRA:
-                return true;
-
-            default:
-                return false;
-        }
     }
 }
