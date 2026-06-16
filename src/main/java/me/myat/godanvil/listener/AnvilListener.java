@@ -3,6 +3,7 @@ package me.myat.godanvil.listener;
 import me.myat.godanvil.GodAnvilPlugin;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -32,98 +33,114 @@ public class AnvilListener implements Listener {
         ItemStack left = inventory.getFirstItem();
         ItemStack right = inventory.getSecondItem();
 
+        // Empty slots
         if (left == null || left.getType() == Material.AIR) {
+            event.setResult(null);
             return;
         }
 
         if (right == null || right.getType() == Material.AIR) {
+            event.setResult(null);
             return;
         }
 
-        /*
-         * BOOK + BOOK
-         */
-        if (left.getType() == Material.ENCHANTED_BOOK
-                && right.getType() == Material.ENCHANTED_BOOK) {
-
-            if (!(left.getItemMeta() instanceof EnchantmentStorageMeta leftMeta)) {
-                return;
-            }
-
-            if (!(right.getItemMeta() instanceof EnchantmentStorageMeta rightMeta)) {
-                return;
-            }
-
-            ItemStack result = new ItemStack(Material.ENCHANTED_BOOK);
-            EnchantmentStorageMeta resultMeta =
-                    (EnchantmentStorageMeta) result.getItemMeta();
-
-            // Copy left book enchants.
-            for (Map.Entry<Enchantment, Integer> entry :
-                    leftMeta.getStoredEnchants().entrySet()) {
-
-                resultMeta.addStoredEnchant(
-                        entry.getKey(),
-                        entry.getValue(),
-                        true
-                );
-            }
-
-            // Merge right book enchants.
-            for (Map.Entry<Enchantment, Integer> entry :
-                    rightMeta.getStoredEnchants().entrySet()) {
-
-                Enchantment enchantment = entry.getKey();
-                int level = entry.getValue();
-
-                if (resultMeta.hasStoredEnchant(enchantment)) {
-                    int current =
-                            resultMeta.getStoredEnchantLevel(enchantment);
-
-                    if (level > current) {
-                        resultMeta.removeStoredEnchant(enchantment);
-                        resultMeta.addStoredEnchant(
-                                enchantment,
-                                level,
-                                true
-                        );
-                    }
-                } else {
-                    resultMeta.addStoredEnchant(
-                            enchantment,
-                            level,
-                            true
-                    );
-                }
-            }
-
-            result.setItemMeta(resultMeta);
-            event.setResult(result);
-
+        // Left side must NOT be a book.
+        if (left.getType() == Material.ENCHANTED_BOOK) {
+            event.setResult(null);
             return;
         }
 
-        /*
-         * ITEM + ENCHANTED BOOK
-         */
-        if (right.getType() == Material.ENCHANTED_BOOK) {
+        // Right side MUST be an enchanted book.
+        if (right.getType() != Material.ENCHANTED_BOOK) {
+            event.setResult(null);
+            return;
+        }
 
-            if (!(right.getItemMeta() instanceof EnchantmentStorageMeta bookMeta)) {
-                return;
-            }
+        // Left item must be enchantable.
+        if (!isEnchantable(left)) {
+            event.setResult(null);
+            return;
+        }
 
-            ItemStack result = left.clone();
+        if (!(right.getItemMeta() instanceof EnchantmentStorageMeta bookMeta)) {
+            event.setResult(null);
+            return;
+        }
 
-            for (Map.Entry<Enchantment, Integer> entry :
-                    bookMeta.getStoredEnchants().entrySet()) {
+        ItemStack result = left.clone();
 
-                result.addUnsafeEnchantment(
-                        entry.getKey(),
-                        entry.getValue()
-                );
-            }
+        // Apply every enchantment from the book.
+        for (Map.Entry<Enchantment, Integer> entry : bookMeta.getStoredEnchants().entrySet()) {
+            result.addUnsafeEnchantment(
+                    entry.getKey(),
+                    entry.getValue()
+            );
+        }
 
-            event.setResult(result);
+        event.setResult(result);
+    }
+
+    private boolean isEnchantable(ItemStack item) {
+
+        Material type = item.getType();
+
+        // Armor
+        if (Tag.ITEMS_HEAD_ARMOR.isTagged(type)
+                || Tag.ITEMS_CHEST_ARMOR.isTagged(type)
+                || Tag.ITEMS_LEG_ARMOR.isTagged(type)
+                || Tag.ITEMS_FOOT_ARMOR.isTagged(type)) {
+            return true;
+        }
+
+        // Tools and weapons
+        switch (type) {
+            case WOODEN_SWORD:
+            case STONE_SWORD:
+            case IRON_SWORD:
+            case GOLDEN_SWORD:
+            case DIAMOND_SWORD:
+            case NETHERITE_SWORD:
+
+            case WOODEN_AXE:
+            case STONE_AXE:
+            case IRON_AXE:
+            case GOLDEN_AXE:
+            case DIAMOND_AXE:
+            case NETHERITE_AXE:
+
+            case WOODEN_PICKAXE:
+            case STONE_PICKAXE:
+            case IRON_PICKAXE:
+            case GOLDEN_PICKAXE:
+            case DIAMOND_PICKAXE:
+            case NETHERITE_PICKAXE:
+
+            case WOODEN_SHOVEL:
+            case STONE_SHOVEL:
+            case IRON_SHOVEL:
+            case GOLDEN_SHOVEL:
+            case DIAMOND_SHOVEL:
+            case NETHERITE_SHOVEL:
+
+            case WOODEN_HOE:
+            case STONE_HOE:
+            case IRON_HOE:
+            case GOLDEN_HOE:
+            case DIAMOND_HOE:
+            case NETHERITE_HOE:
+
+            case BOW:
+            case CROSSBOW:
+            case TRIDENT:
+            case MACE:
+            case FISHING_ROD:
+            case SHEARS:
+            case SHIELD:
+            case ELYTRA:
+                return true;
+
+            default:
+                return false;
         }
     }
 }
